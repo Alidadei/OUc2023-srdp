@@ -1,0 +1,6 @@
+-c --cpu Cortex-M4.fp -g -O0 --apcs=interwork --split_sections -I ..\CORE -I ..\SYSTEM\delay -I ..\SYSTEM\sys -I ..\SYSTEM\usart -I ..\FWLIB\STM32F4xx_StdPeriph_Driver\inc -I ..\USER -I ..\HARDWARE\LED -I ..\HARDWARE\BEEP -I ..\HARDWARE\KEY -I ..\FWLIB\inc
+-I.\RTE\_USART
+-IF:\Keil5\ARM\PACK\Keil\STM32F4xx_DFP\1.0.8\Device\Include
+-IF:\Keil5\ARM\CMSIS\Include
+-D__UVISION_VERSION="524" -DSTM32F40_41xxx -DSTM32F40_41xxx -DUSE_STDPERIPH_DRIVER
+-o ..\obj\voiceresponse.o --omf_browse ..\obj\voiceresponse.crf --depend ..\obj\voiceresponse.d "VoiceResponse.c"

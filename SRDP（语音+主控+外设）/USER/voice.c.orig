@@ -1,0 +1,64 @@
+//***************************和语音模块通讯的文件，使用USART1串口！**********************************************/
+#include "sys.h"
+#include "voice.h"
+#include "usart.h"
+#include <stdio.h>
+#include "led.h"
+///********************************语音模块与主控通讯消息合集↓↓↓↓**********************************************/
+
+//*********（32主控->语音）:*****************************************
+
+//疲劳提醒消息
+u8 RemindTired1[]= {0xAA, 0x55, 0x03,0x03, 0x55, 0xAA};
+
+//提醒成年人坐姿的消息数组
+u8 Remind_Pos_Adt[] = {0xAA, 0x55, 0x02,0x02, 0x55, 0xAA};
+
+//自动调光通知（当亮度偏低的时候）
+u8 Auto_Light_info[]= {0xAA, 0x55, 0x00,0x00, 0x55, 0xAA};
+
+//*********（语音->32主控）:*****************************************
+enum VOICE_MSG { light_open=0x01, light_shut, light_up,light_down,
+                 fan_open, fan_shut, fan_up, fan_down=0x08
+               } voice_cmd;
+/****************************************************************************************/
+
+//*********（32主控->语音）:*****************************************
+//坐姿提醒（用串口发送消息的形式）
+//mode模式不同，发送不同消息
+void Remind_pose(u8 mode)
+{
+  if(mode)
+    {
+
+      Serial_SendArray(Remind_Pos_Adt,6); //提醒成年人坐姿
+    }
+  else {} //提醒儿童坐姿
+
+}
+
+//*********（语音->32主控）:*****************************************
+//外设控制，根据消息编号进行
+void Voice_ctr(u8 cmd)
+{
+  //这里需要匹配消息编号，可以使用二分查找来提高效率！
+  u8 msg_num_r=fan_down;//设置消息编号的初始上下限
+	u8 msg_num_l=light_open;
+	u8 middle=(msg_num_l+msg_num_r)/2;//设置初始的“二分中轴”
+	while(msg_num_l<=msg_num_r){
+		middle=(msg_num_l+msg_num_r)/2;
+		if(middle<cmd){//中轴偏小，需要右移
+			msg_num_l=middle;}
+		else{msg_num_r=middle;}
+			
+			
+		}
+	}
+	
+
+  if(cmd==0x01)
+    {
+      GPIO_ResetBits(GPIOF,  GPIO_Pin_10|GPIO_Pin_9);//PF9&PF10设低电平，点亮
+    }
+
+}
