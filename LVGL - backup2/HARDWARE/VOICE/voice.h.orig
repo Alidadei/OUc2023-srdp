@@ -1,0 +1,23 @@
+#ifndef _VOICE_H
+#define _VOICE_H
+#include "stdio.h"
+#include "stm32f4xx_conf.h"
+#include "sys.h"
+void Remind_pose(u8 mode);//提醒坐姿（用串口发送消息的形式）
+void Voice_ctr(u8 cmd);//控制外设
+//外设控制函数
+void Light_Open(void);
+void Light_Shut(void);
+void Light_Up(void);
+void Light_Down(void);
+void FAN_Open(void);
+void FAN_Shut(void);
+void FAN_Up(void);
+void FAN_Down(void);
+void(*Voice_ctr_func[8])(void)={ Light_Open,Light_Shut,Light_Up,Light_Down,
+	FAN_Open,FAN_Shut,FAN_Up,FAN_Down}
+
+
+#endif
+
+
