@@ -20,6 +20,8 @@ static lv_obj_t* tile2;        /*页面对象2*/
 static lv_obj_t* tile3;        /*页面对象3*/
 static lv_obj_t* time_label1;	//定义时间标签
 static lv_obj_t* time_label2;	//定义日期标签
+static lv_obj_t* temp_label;    //定义温度标签
+static lv_obj_t* bright_label;  //定义亮度标签
 static lv_obj_t* slider1;       //定义滑块1
 static lv_obj_t* slider2;       //定义滑块2
 static lv_obj_t* slider3;       //定义滑块3
@@ -183,6 +185,12 @@ static void slider3_event_cb(lv_event_t* e)
     }
 }
 
+///温度亮度修改函数
+void Temp_Bright_Update(uint8_t temp,uint8_t brightness)
+{
+    lv_label_set_text_fmt(temp_label,"Degree Celsius: %d",temp);//更改亮度
+    lv_label_set_text_fmt(bright_label,"lux: %d",brightness);//更改亮度
+}
 
 ///第一页面板设置
 void tileview_page1_set()
@@ -197,6 +205,16 @@ void tileview_page1_set()
     lv_label_set_text_fmt(time_label2,"20%d/%02d/%02d",23,9,7);//显示年月日
     lv_obj_set_style_text_font(time_label2,font,LV_STATE_DEFAULT);//字体大小设置
     lv_obj_align_to(time_label2,time_label1,LV_ALIGN_OUT_BOTTOM_MID,0,scr_act_height()/12);//对齐
+	//显示当前温度
+    temp_label = lv_label_create(tile1);
+    lv_label_set_text_fmt(temp_label,"Degree Celsius: %d",25);//显示温度
+    lv_obj_set_style_text_font(temp_label,font,LV_STATE_DEFAULT);//字体大小设置
+    lv_obj_align_to(temp_label,time_label2,LV_ALIGN_OUT_BOTTOM_MID,0,scr_act_height()/12);//对齐
+    //显示当前亮度
+    bright_label = lv_label_create(tile1);
+    lv_label_set_text_fmt(bright_label,"lux: %d",200);//显示亮度
+    lv_obj_set_style_text_font(bright_label,font,LV_STATE_DEFAULT);//字体大小设置
+    lv_obj_align_to(bright_label,temp_label,LV_ALIGN_OUT_BOTTOM_MID,0,scr_act_height()/12);//对齐
 }
 
 ///第二页面板设置
