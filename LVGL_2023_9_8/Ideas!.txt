@@ -1,0 +1,20 @@
+
+********************************************利用函数指针数组创建哈希表**********************************
+//具体的外设控制函数
+void Light_Open(void);
+void Light_Shut(void);
+void Light_Up(void);
+void Light_Down(void);
+void FAN_Open(void);
+void FAN_Shut(void);
+void FAN_Up(void);
+void FAN_Down(void);
+u8 cmd;
+//外设控制函数的指针数组，相当于一个哈希表(在哪个文件里调用就在哪里定义！)
+void(*Voice_ctr_func[8])(void)= { Light_Open, Light_Shut, Light_Up, Light_Down,
+                                  FAN_Open,     FAN_Shut,    FAN_Up,FAN_Down
+ 
+};
+
+Voice_ctr_func[cmd]();//直接通过函数指针数组来调用对应的控制函数，相当于哈希查找！
+**************************************************************************************************************
