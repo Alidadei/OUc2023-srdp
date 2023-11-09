@@ -28,6 +28,7 @@ int main(void)
   KEY_Init(); 				//按键初始化
   My_RTC_Init();				//RTC时钟初始化
   WKUP_Init(); 			//PF0 WKUP引脚初始化
+  LK_Init();//PF1 PHONE_LK引脚初始化
 
   //LVGL相关初始化
   TIM3_Int_Init(100-1,840-1);//定时器3初始化，计时1ms，即1000Hz，与lvgl时基配置的频率保持一致

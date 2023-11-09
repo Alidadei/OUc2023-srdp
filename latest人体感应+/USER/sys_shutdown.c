@@ -3,7 +3,27 @@
 #include "delay.h"
 #include "sys_shutdown.h"
 //人体感应O脚连接PF0，V脚连5V，G脚接地
+//手机锁红线接PF1，黑线接地
 
+//PF1 PHONE_LK引脚初始化
+void LK_Init(void)
+{
+
+  GPIO_InitTypeDef  GPIO_InitStructure;
+
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOF, ENABLE);//使能GPIOF时钟
+
+
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1; //Pin1脚
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;//输出模式
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;//推挽输出
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;//无上下拉
+  GPIO_Init(GPIOF, &GPIO_InitStructure);//初始化配置PF1
+	PHONE_LK=0;//初始化手机锁为上锁状态
+
+
+}
 //PF0 初始化
 void WKUP_Init(void)
 {
@@ -18,6 +38,7 @@ void WKUP_Init(void)
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;//无上下拉，完全由外部输入决定
   GPIO_Init(GPIOF, &GPIO_InitStructure);//初始化PF0
+	
 
 }
 //检测WKUP脚的信号
@@ -44,12 +65,14 @@ u8 Check_WKUP(void)
     }
   return tx;
 }
+//打开手机锁
+void Lock_open(void) {PHONE_LK=1;}
 //系统进入待机模式
 void sys_shut(void)
 {
 
   Light_Shut();
   FAN_Shut();
-  //Lock_open();//打开手机锁
+  Lock_open();//打开手机锁
 
 }
