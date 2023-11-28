@@ -1,0 +1,124 @@
+#include "sys.h"
+#include "delay.h"
+#include "usart3.h"
+#include "led.h"
+#include "lcd.h"
+#include "key.h"
+#include "voice.h"
+#include "fan.h"
+#include "touch.h"
+#include "timer.h"
+#include "lvgl.h"
+#include "lv_port_disp_template.h"
+#include "lv_port_indev_template.h"
+#include "LV_GUITASK.h"
+#include "rtc.h"
+#include "sys_shutdown.h"
+
+
+#include "BH1750.h"
+#include "myiic.h"
+
+#include "stm32f4xx.h"
+#include "delay.h"
+#include "dht11.h"
+
+//*注意F407主频为84MHz*//
+u8 wd=0,sd;
+u8 tab_wd[5],tab_sd[5];
+char set_date=28;
+char Set_date[5];
+
+//LCD状态设置函数
+void led_set(u8 sta)//只要工程目录下有usmart调试函数，主函数就必须调用这两个函数
+{
+	LED1=sta;
+}
+//函数参数调用测试函数
+void test_fun(void(*ledset)(u8),u8 sta)
+{
+	led_set(sta);
+}
+
+int main(void)
+{
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//设置系统中断优先级分组2
+	delay_init(168);  			//初始化延时函数
+	uart_init1(9600);			//初始化串口波特率为115200
+	LED_Init();					//初始化LED
+	KEY_Init(); 				//按键初始化
+	My_RTC_Init();				//RTC时钟初始化
+	WKUP_Init(); 			//PF0 WKUP引脚初始化
+	LK_Init();//PF1 PHONE_LK引脚初始化
+
+	//LVGL相关初始化
+	TIM3_Int_Init(100-1,840-1);//定时器3初始化，计时1ms，即1000Hz，与lvgl时基配置的频率保持一致
+	TIM4_Int_Init(500-1,84-1);//定时器4初始化,2000Hz
+	lv_init();//lvgl初始化
+	lv_port_disp_init();//显示设备接口初始化
+	lv_port_indev_init();//输入设备接口初始化
+	lv_mainstart();//启用lvgl页面
+
+	uint8_t TilePageSet_Enable = 0;//平铺视图页面更新到主页面使能变量
+	SystemInit();	//System init.
+	DHT11_Init();//温度传感器初始化
+
+
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+	LightSensor_Init();
+
+  //设置两个标志记录当前和上一次人体检测信号值
+	u8 IS_person_now=0;
+	u8 IS_person_last=1;//为保证第一次能开锁，初始值写为1
+	while(1)
+    {
+		IS_person_now=Check_WKUP();//获取当前人体检测信号
+
+		if(IS_person_now)//当前检测有人
+        {
+			delay_ms(5);
+			TilePageSet_Enable = 0;//更新平铺视图页面切换使能
+			lv_timer_handler();//大约5ms一次调用该函数
+			Voice_ctrol();//语音控制
+			RTC_GetTime(RTC_Format_BIN,&RTC_TimeStruct);//获取时间
+			RTC_GetDate(RTC_Format_BIN,&RTC_DateStruct);//获取日期
+			date_time_update();
+			DHT11_Read_Data(&wd,&sd);
+			Auto_light();//自动调光
+			Temp_Bright_Update( wd,LightSensor_Get_Val());//更新温度和亮度信息
+			IS_person_last=IS_person_now;//把当前的人体感应信号记录下来
+        }
+				
+      else//当前检测无人
+      {
+          sys_shut();//关灯关风扇
+
+          if(IS_person_last)
+          {
+              Lock_open();//打开手机锁（只开一次）
+          }
+          lv_timer_handler();//大约5ms一次调用该函数
+          RTC_GetTime(RTC_Format_BIN,&RTC_TimeStruct);//获取时间
+          RTC_GetDate(RTC_Format_BIN,&RTC_DateStruct);//获取日期
+          date_time_update();//仍然更新时间
+          if(!TilePageSet_Enable)
+          {
+              tile_page_set();//设置为主页面
+              TilePageSet_Enable = 1;
+          }
+          IS_person_last=IS_person_now;//把当前的人体感应信号记录下来
+       }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
